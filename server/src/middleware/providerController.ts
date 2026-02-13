@@ -40,3 +40,26 @@ export const getProviderOrders = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Failed to fetch orders' });
   }
 };
+
+// Update Order Status
+export const updateOrderStatus = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    //Validation status
+    if (!Object.values(OrderStatus).includes(status)) {
+        res.status(400).json({ error: "Invalid status value" });
+        return;
+    }
+
+    const updatedOrder = await prisma.order.update({
+      where: { id: Number(id) },
+      data: { status: status as OrderStatus }
+    });
+
+    res.json(updatedOrder);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update status' });
+  }
+};
