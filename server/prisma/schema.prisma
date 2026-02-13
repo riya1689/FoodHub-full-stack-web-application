@@ -70,7 +70,7 @@ model Order{
   id Int @id @default(autoincrement())
   totalAmount Decimal
   status OrderStatus @default(PENDING)
-  OrderAddress String
+  address String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   customerId Int
