@@ -10,6 +10,7 @@ import publicRoutes from './routes/publicRoutes';
 
 dotenv.config();
 
+
 const app = express();
 
 app.use(cors());
@@ -22,7 +23,15 @@ app.use('/api/admin', adminRoutes);
 app.use('/api', publicRoutes);
 
 app.get('/', (req: Request, res: Response) => {
-  res.send('FoodHub API is running...');
+  res.send('FoodHub API is running');
 });
+
+const port = process.env.PORT || 5000;
+
+if(require.main === module){
+    app.listen(port, ()=>{
+        console.log(`FoodHub API is running on port ${port}`);
+    });
+}
 
 export default app;
