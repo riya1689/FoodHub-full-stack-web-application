@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "main": "src/index.ts",
   "scripts": {
-    "dev": "nodemon src/index.ts",
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "postinstall": "prisma generate",
-    "db:push": "npx prisma db push",
-    "db:gen": "npx prisma generate"
-  },
+  "dev": "nodemon src/index.ts",
+  "build": "tsc && prisma generate",
+  "start": "node dist/index.js",
+  "postinstall": "prisma generate",
+  "db:push": "npx prisma db push",
+  "db:gen": "npx prisma generate"
+ },
   "dependencies": {
     "@prisma/client": "5.10.2",
     "bcryptjs": "^2.4.3",
