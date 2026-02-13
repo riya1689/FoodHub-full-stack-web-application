@@ -63,3 +63,39 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Failed to update status' });
   }
 };
+
+// Get All Providers (Restaurants)
+export const getAllProviders = async (req: Request, res: Response) => {
+  try {
+    const providers = await prisma.providerProfile.findMany({
+      include: { 
+         user: { select: { name: true } } 
+      }
+    });
+    res.json(providers);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch providers" });
+  }
+};
+
+// Get Single Provider with Menu
+export const getProviderById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const provider = await prisma.providerProfile.findUnique({
+      where: { id: Number(id) },
+      include: {
+        meals: true, // Include their menu!
+        user: { select: { name: true } }
+      }
+    });
+
+    if (!provider) {
+       res.status(404).json({ error: "Provider not found" });
+       return;
+    }
+    res.json(provider);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching provider" });
+  }
+};
