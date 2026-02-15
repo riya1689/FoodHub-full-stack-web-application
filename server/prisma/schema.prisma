@@ -58,7 +58,7 @@ model Meal{
   name String
   description String?
   price Decimal
-  ImageUrl String
+  imageUrl String?
   categoryId Int
   category Category @relation(fields: [categoryId], references: [id])
   providerId Int
