@@ -35,7 +35,7 @@ export const addMeal = async (req: Request, res: Response) => {
         price: parseFloat(price),
         categoryId: Number(categoryId),
         providerId: Number(providerId),
-        ImageUrl: imageUrl || null
+        imageUrl: imageUrl || null
       }
     });
     res.status(201).json(meal);
