@@ -150,3 +150,46 @@ export const getProviderById = async (req: Request, res: Response): Promise<void
     res.status(500).json({ error: "Error fetching provider" });
   }
 };
+
+// Add a new Meal (Provider Only)
+export const addMeal = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    const profile = await prisma.providerProfile.findUnique({ where: { userId } });
+    
+    if (!profile) { 
+      res.status(404).json({ error: "Provider profile not found" }); 
+      return; 
+    }
+
+    const { name, description, price, imageUrl, dietaryPref, categoryId } = req.body;
+    
+    const meal = await prisma.meal.create({
+      data: {
+        name, 
+        description, 
+        price, 
+        imageUrl: imageUrl || "https://placehold.co/600x400?text=New+Meal", 
+        dietaryPref,
+        categoryId: Number(categoryId),
+        providerId: profile.id
+      }
+    });
+    
+    res.status(201).json({ message: "Meal added successfully", meal });
+  } catch (error) { 
+    console.error(error);
+    res.status(500).json({ error: "Failed to add meal" }); 
+  }
+};
+
+// Delete a Meal (Provider Only)
+export const deleteMeal = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    await prisma.meal.delete({ where: { id: Number(id) } });
+    res.json({ message: "Meal deleted successfully" });
+  } catch (error) { 
+    res.status(500).json({ error: "Failed to delete meal. It might be linked to an order." }); 
+  }
+};
