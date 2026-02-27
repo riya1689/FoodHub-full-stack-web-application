@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import prisma from '../db';
+
 import { OrderStatus } from '@prisma/client';
+
 
 // Get Orders for this Provider's Meals
 
@@ -85,7 +87,9 @@ export const getProviderById = async (req: Request, res: Response): Promise<void
     const provider = await prisma.providerProfile.findUnique({
       where: { id: Number(id) },
       include: {
-        meals: true, // Include their menu!
+        meals: {
+          include: { category: true }
+        },
         user: { select: { name: true } }
       }
     });
@@ -99,3 +103,25 @@ export const getProviderById = async (req: Request, res: Response): Promise<void
     res.status(500).json({ error: "Error fetching provider" });
   }
 };
+
+// Get Single Provider with Menu
+// export const getProviderById = async (req: Request, res: Response): Promise<void> => {
+//   try {
+//     const { id } = req.params;
+//     const provider = await prisma.providerProfile.findUnique({
+//       where: { id: Number(id) },
+//       include: {
+//         meals: true, // Include their menu!
+//         user: { select: { name: true } }
+//       }
+//     });
+
+//     if (!provider) {
+//        res.status(404).json({ error: "Provider not found" });
+//        return;
+//     }
+//     res.json(provider);
+//   } catch (error) {
+//     res.status(500).json({ error: "Error fetching provider" });
+//   }
+// };
