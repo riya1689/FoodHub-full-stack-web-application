@@ -13,7 +13,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     }
 
     // Calculate Total Price & Verify Items exist
-    let totalAmount = 0;
+    let totalAmount = 50;
     const orderItemsData = [];
 
     for (const item of items) {
