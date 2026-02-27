@@ -3,6 +3,53 @@ import prisma from '../db';
 
 import { OrderStatus } from '@prisma/client';
 
+// Get Provider Dashboard Stats (Private)
+export const getDashboardStats = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    
+    const profile = await prisma.providerProfile.findUnique({
+      where: { userId: userId }
+    });
+
+    if (!profile) {
+      res.status(404).json({ error: "Provider profile not found" });
+      return;
+    }
+
+    // Count active meals
+    const mealsCount = await prisma.meal.count({
+      where: { providerId: profile.id }
+    });
+
+    // Find orders containing this provider's meals
+    const orders = await prisma.order.findMany({
+      where: {
+        items: { some: { meal: { providerId: profile.id } } }
+      },
+      include: {
+        items: {
+          where: { meal: { providerId: profile.id } } // Only include THIS provider's items
+        }
+      }
+    });
+
+    //  Calculate Revenue (Only from this provider's items)
+    const revenue = orders.reduce((total, order) => {
+      const orderRevenue = order.items.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0);
+      return total + orderRevenue;
+    }, 0);
+
+    res.json({
+      totalOrders: orders.length,
+      activeMeals: mealsCount,
+      revenue: revenue
+    });
+  } catch (error) {
+    console.error("Error fetching stats:", error);
+    res.status(500).json({ error: "Failed to fetch dashboard stats" });
+  }
+};
 
 // Get Orders for this Provider's Meals
 
@@ -103,25 +150,3 @@ export const getProviderById = async (req: Request, res: Response): Promise<void
     res.status(500).json({ error: "Error fetching provider" });
   }
 };
-
-// Get Single Provider with Menu
-// export const getProviderById = async (req: Request, res: Response): Promise<void> => {
-//   try {
-//     const { id } = req.params;
-//     const provider = await prisma.providerProfile.findUnique({
-//       where: { id: Number(id) },
-//       include: {
-//         meals: true, // Include their menu!
-//         user: { select: { name: true } }
-//       }
-//     });
-
-//     if (!provider) {
-//        res.status(404).json({ error: "Provider not found" });
-//        return;
-//     }
-//     res.json(provider);
-//   } catch (error) {
-//     res.status(500).json({ error: "Error fetching provider" });
-//   }
-// };
