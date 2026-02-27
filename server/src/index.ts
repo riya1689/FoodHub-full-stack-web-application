@@ -8,6 +8,7 @@ import providerRoutes from './routes/providerRoutes';
 import adminRoutes from './routes/adminRoutes';
 import publicRoutes from './routes/publicRoutes';
 import orderRoutes from './routes/orderRoutes';
+import providerPrivateRoutes from './routes/providerPrivateRoutes';
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use('/api/provider', providerRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api', publicRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/provider', providerPrivateRoutes);
 
 app.get('/', (req: Request, res: Response) => {
   res.send('FoodHub API is running');
