@@ -1,10 +1,10 @@
 import express from 'express';
-import { getMeals, addMeal, getMealById } from '../controllers/mealController';
+import { getAllMeals, addMeal, getMealById } from '../controllers/mealController';
 
 const router = express.Router();
 
 // Public Routes
-router.get('/', getMeals);
+router.get('/', getAllMeals);
 router.get('/:id', getMealById);
 
 // Protected Routes

@@ -1,20 +1,26 @@
 import {Request, Response} from 'express';
+import { PrismaClient } from '@prisma/client';
 import prisma from '../db';
 
 //get all meals
 
-export const getMeals = async (req: Request, res: Response) =>{
-    try{
-        const meals = await prisma.meal.findMany({
-            include:{
-                provider: true,
-                category: true
-            }
-        });
-        res.json(meals);
-    }catch(error){
-        res.status(500).json({error: 'Failed to fetch meals'});
-    }
+export const getAllMeals = async (req: Request, res: Response) => {
+  try {
+    const meals = await prisma.meal.findMany({
+      include: {
+        category: true, // <-- MUST INCLUDE CATEGORY
+        provider: {     // <-- MUST INCLUDE PROVIDER
+          include: {
+            user: true  // Includes the restaurant's User name if needed
+          }
+        }
+      }
+    });
+    res.json(meals);
+  } catch (error) {
+    console.error("Error fetching meals:", error);
+    res.status(500).json({ error: "Failed to fetch meals" });
+  }
 };
 
 //Add a meal (only provider)

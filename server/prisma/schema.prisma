@@ -39,8 +39,10 @@ model User{
 model ProviderProfile{
   id Int @id @default(autoincrement())
   restaurantName String
-  cuisine String
+  cuisines String[]
   address String
+  imageUrl String?
+  rating Float  @default(4.5)
   userId Int @unique
   user User @relation(fields: [userId], references: [id])
   meals Meal[]
@@ -59,6 +61,7 @@ model Meal{
   description String?
   price Decimal
   imageUrl String?
+  dietaryPref String?
   categoryId Int
   category Category @relation(fields: [categoryId], references: [id])
   providerId Int
