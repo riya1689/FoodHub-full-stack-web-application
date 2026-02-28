@@ -1,5 +1,5 @@
 import express from 'express';
-import { getDashboardStats, getProviderOrders, updateOrderStatus, addMeal, deleteMeal } from '../controllers/providerController';
+import { getProviderMeals, getDashboardStats, getProviderOrders, updateOrderStatus, addMeal, deleteMeal } from '../controllers/providerController';
 import { authenticateToken } from '../middleware/authMiddleware'; 
 
 const router = express.Router();
@@ -15,5 +15,8 @@ router.patch('/orders/:id', authenticateToken, updateOrderStatus);
 //menu management route
 router.post('/meals', authenticateToken, addMeal);
 router.delete('/meals/:id', authenticateToken, deleteMeal);
+
+// Getting provider meal
+router.get('/meals', authenticateToken, getProviderMeals);
 
 export default router;

@@ -9,6 +9,8 @@ import adminRoutes from './routes/adminRoutes';
 import publicRoutes from './routes/publicRoutes';
 import orderRoutes from './routes/orderRoutes';
 import providerPrivateRoutes from './routes/providerPrivateRoutes';
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
 
 dotenv.config();
 
@@ -26,6 +28,15 @@ app.use('/api', publicRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/provider', providerPrivateRoutes);
 
+// Public route to get all categories
+app.get('/api/categories', async (req, res) => {
+  try {
+    const categories = await prisma.category.findMany();
+    res.json(categories);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch categories" });
+  }
+});
 app.get('/', (req: Request, res: Response) => {
   res.send('FoodHub API is running');
 });
