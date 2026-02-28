@@ -10,6 +10,8 @@ import publicRoutes from './routes/publicRoutes';
 import orderRoutes from './routes/orderRoutes';
 import providerPrivateRoutes from './routes/providerPrivateRoutes';
 import { PrismaClient } from '@prisma/client';
+import reviewRoutes from './routes/reviewRoutes'
+
 const prisma = new PrismaClient();
 
 dotenv.config();
@@ -27,6 +29,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api', publicRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/provider', providerPrivateRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 // Public route to get all categories
 app.get('/api/categories', async (req, res) => {
