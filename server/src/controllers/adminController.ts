@@ -40,7 +40,8 @@ export const getAdminStats = async (req: Request, res: Response): Promise<void> 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
     const users = await prisma.user.findMany({
-      select: { id: true, name: true, email: true, role: true, createdAt: true }
+      select: { id: true, name: true, email: true, role: true, isActive: true, createdAt: true },
+      orderBy: { createdAt: 'desc' }
     });
     res.json(users);
   } catch (error) {
@@ -61,5 +62,29 @@ export const getAllOrders = async (req: Request, res: Response) => {
     res.json(orders);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch orders' });
+  }
+};
+
+export const updateUserStatus = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { isActive } = req.body;
+    
+    // Security: Prevent admin from suspending themselves
+    if (Number(id) === req.user?.userId) {
+      res.status(400).json({ error: "You cannot suspend your own admin account." });
+      return;
+    }
+
+    const user = await prisma.user.update({
+      where: { id: Number(id) },
+      data: { isActive },
+      select: { id: true, name: true, isActive: true }
+    });
+
+    res.json({ message: `User ${isActive ? 'activated' : 'suspended'} successfully`, user });
+  } catch (error) {
+    console.error("Error updating user status:", error);
+    res.status(500).json({ error: "Failed to update user status" });
   }
 };
