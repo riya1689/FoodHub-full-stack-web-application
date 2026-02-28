@@ -193,3 +193,23 @@ export const deleteMeal = async (req: Request, res: Response): Promise<void> => 
     res.status(500).json({ error: "Failed to delete meal. It might be linked to an order." }); 
   }
 };
+// Get Logged-in Provider's Meals
+export const getProviderMeals = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    const profile = await prisma.providerProfile.findUnique({ 
+      where: { userId },
+      include: { meals: { include: { category: true } } }
+    });
+    
+    if (!profile) {
+      res.status(404).json({ error: "Provider profile not found" });
+      return;
+    }
+    
+    res.json(profile.meals);
+  } catch (error) {
+    console.error("Error fetching provider meals:", error);
+    res.status(500).json({ error: "Failed to fetch meals" });
+  }
+};
