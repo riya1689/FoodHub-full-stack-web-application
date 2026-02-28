@@ -50,17 +50,25 @@ export const getAllUsers = async (req: Request, res: Response) => {
 };
 
 // Get All Orders (Platform wide)
+
 export const getAllOrders = async (req: Request, res: Response) => {
   try {
     const orders = await prisma.order.findMany({
       include: { 
         customer: { select: { name: true, email: true } },
-        items: { include: { meal: true } }
+        items: { 
+          include: { 
+            meal: {
+              include: { provider: true } 
+            } 
+          } 
+        }
       },
       orderBy: { createdAt: 'desc' }
     });
     res.json(orders);
   } catch (error) {
+    console.error("Error fetching all orders:", error);
     res.status(500).json({ error: 'Failed to fetch orders' });
   }
 };
