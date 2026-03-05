@@ -20,9 +20,23 @@ export const register = async (req: Request, res: Response): Promise<void> => {
                 role: role || 'CUSTOMER',
             },
         });
-        res.status(201).json({message: 'User Registered Successfully', userId: user.id})
-    }
+
+        // Generate secure JWT token on registration
+        const token = jwt.sign(
+            { userId: user.id, role: user.role },
+            process.env.JWT_SECRET as string,
+            { expiresIn: '1d' }
+        );
+
+        // Return the token and safe user data to frontend
+        res.status(201).json({
+            message: 'User Registered Successfully', 
+            token,
+            user: { id: user.id, name: user.name, role: user.role }
+        });
+      }
     catch(error){
+        console.error("Registration error:", error);
         res.status(500).json({error: 'Registration failed'});
     }
 };
