@@ -27,7 +27,12 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
     const verified = jwt.verify(token, process.env.JWT_SECRET as string) as UserPayload;
     req.user = verified; 
     next(); 
-  } catch (error) {
-    res.status(403).json({ error: 'Invalid token' });
+  } catch (error: any) {
+    // Advanced error handling for JWT
+    if (error.name === 'TokenExpiredError') {
+        res.status(401).json({ error: 'Session expired. Please log in again.' });
+        return;
+    }
+    res.status(403).json({ error: 'Invalid token.' });
   }
 };
