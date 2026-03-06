@@ -1,7 +1,8 @@
 import {Request, Response  } from 'express';
 import prisma from '../db';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken';
+import { OAuth2Client } from 'google-auth-library';
 export const register = async (req: Request, res: Response): Promise<void> => {
     try{
         const { email, password, name, role } =req.body;
@@ -127,5 +128,64 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
   } catch (error) {
     console.error("Error updating profile:", error);
     res.status(500).json({ error: "Failed to update profile" });
+  }
+};
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// Google OAuth Login/Register
+export const googleAuth = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { token, role } = req.body;
+
+    // Verify token with Google
+    const ticket = await googleClient.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email) {
+      res.status(400).json({ error: "Invalid Google token" });
+      return;
+    }
+
+    const { email, name } = payload;
+
+    // Check if user already exists in DB
+    let user = await prisma.user.findUnique({ where: { email } });
+
+    //  If new user, create them
+    if (!user) {
+      // Generate a random password since they use Google to log in
+      const randomPassword = Math.random().toString(36).slice(-12);
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+      user = await prisma.user.create({
+        data: {
+          email,
+          name: name || 'Google User',
+          password: hashedPassword,
+          role: role || 'CUSTOMER',
+        },
+      });
+    }
+
+    // Generate JWT for our platform
+    const jwtToken = jwt.sign(
+      { userId: user.id, role: user.role },
+      process.env.JWT_SECRET as string,
+      { expiresIn: '1d' }
+    );
+
+    res.status(200).json({
+      message: 'Google authentication successful',
+      token: jwtToken,
+      user: { id: user.id, name: user.name, role: user.role }
+    });
+
+  } catch (error) {
+    console.error("Google auth error:", error);
+    res.status(500).json({ error: "Google authentication failed" });
   }
 };
